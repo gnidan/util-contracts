@@ -1,7 +1,7 @@
 const _ = require('lodash')
 
 const PRECISION = 80
-const Decimal = require('decimal.js').clone({ precision: PRECISION })
+const Decimal = require('decimal.js').clone({ precision: PRECISION, toExpPos: PRECISION })
 
 const ONE = Decimal(2).pow(64)
 
@@ -24,7 +24,7 @@ function randnums (a, b, n) {
   return _.range(n).map(() => randrange(a, b))
 }
 
-function getParamFromTxEvent (transaction, paramName, contractFactory, eventName) {
+async function getParamFromTxEvent (transaction, paramName, contractFactory, eventName) {
   assert.isObject(transaction)
   let logs = transaction.logs
   if (eventName != null) {
@@ -33,7 +33,7 @@ function getParamFromTxEvent (transaction, paramName, contractFactory, eventName
   assert.equal(logs.length, 1, `expected one log but got ${logs.length} logs`)
   let param = logs[0].args[paramName]
   if (contractFactory != null) {
-    let contract = contractFactory.at(param)
+    let contract = await contractFactory.at(param)
     assert.isObject(contract, `getting ${paramName} failed for ${param}`)
     return contract
   } else {
